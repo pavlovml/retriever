@@ -1,4 +1,4 @@
-FROM python:2.7
+FROM python:3.5
 MAINTAINER Alex Kern <alex@pavlovml.com>
 
 # deps
@@ -6,8 +6,8 @@ RUN apt-get update && \
     apt-get install -y libopenblas-dev gfortran && \
     pip install numpy && \
     pip install scipy && \
-    pip install scikit-image cairosvg elasticsearch flask gunicorn && \
-    pip install git+https://github.com/ascribe/image-match.git@0.2.1
+    pip install flask gunicorn && \
+    pip install image-match
 
 # install
 RUN mkdir -p /app
