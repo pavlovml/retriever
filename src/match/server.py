@@ -53,10 +53,11 @@ def get_image(url_field, file_field):
 @app.route('/add', methods=['POST'])
 def add_handler():
     path = request.form['filepath']
+    metadata = request.form['metadata']
     img, bs = get_image('url', 'image')
 
     old_ids = ids_with_path(path)
-    ses.add_image(path, img, bytestream=bs)
+    ses.add_image(path, img, bytestream=bs, metadata=metadata)
     delete_ids(old_ids)
 
     return json.dumps({
