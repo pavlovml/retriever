@@ -164,6 +164,10 @@ Adds an image signature to the database.
 
   The path to save the image to in the database. If another image already exists at the given path, it will be overwritten.
 
+* **metadata** *(default: None)*
+
+  An arbitrary JSON object featuring meta data to attach to the image.
+
 #### Example Response
 
 ```json
