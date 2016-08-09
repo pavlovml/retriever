@@ -8,12 +8,18 @@ import os
 # =============================================================================
 # Globals
 
+
 app = Flask(__name__)
-es = Elasticsearch([os.environ['ELASTICSEARCH_URL']])
+es = Elasticsearch([os.environ.get('ELASTICSEARCH_URL',
+                                   'http://elasticsearch')])
 es_index = os.environ.get('ELASTICSEARCH_INDEX', 'images')
 es_doc_type = os.environ.get('ELASTICSEARCH_DOC_TYPE', 'images')
 ses = SignatureES(es, index=es_index, doc_type=es_doc_type)
 gis = ImageSignature()
+
+# Try to create the index and ignore IndexAlreadyExistsException
+# if the index already exists
+es.indices.create(index=es_index, ignore=400)
 
 # =============================================================================
 # Helpers
