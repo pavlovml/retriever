@@ -8,8 +8,9 @@ import os
 # =============================================================================
 # Globals
 
+
 app = Flask(__name__)
-es = Elasticsearch([os.environ['ELASTICSEARCH_URL']])
+es = Elasticsearch([os.environ.get('ELASTICSEARCH_URL', 'http://db')])
 es_index = os.environ.get('ELASTICSEARCH_INDEX', 'images')
 es_doc_type = os.environ.get('ELASTICSEARCH_DOC_TYPE', 'images')
 ses = SignatureES(es, index=es_index, doc_type=es_doc_type)
