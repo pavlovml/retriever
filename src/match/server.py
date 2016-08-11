@@ -104,7 +104,8 @@ def search_handler():
         'method': 'search',
         'result': [{
             'score': dist_to_percent(m['dist']),
-            'filepath': m['path']
+            'filepath': m['path'],
+            'metadata': m['metadata']
         } for m in matches]
     })
 
