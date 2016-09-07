@@ -24,8 +24,6 @@ devel: build kill
 	    --name pavlov_elasticsearch \
 	    -p $(ELASTICSEARCH_PORT):9200 \
 	    elasticsearch
-	# Wait until elasticsearch is running
-	wget --retry-connrefused --tries=10 -q --wait=1 --spider localhost:$(ELASTICSEARCH_PORT)
 	docker run -d \
 	    --name pavlov_match \
 	    -p $(PORT):80 \

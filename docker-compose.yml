@@ -1,0 +1,11 @@
+version: '2'
+services:
+    match:
+        build: .
+        ports:
+            - "8888:80"
+        links:
+            - elasticsearch
+    elasticsearch:
+        image: elasticsearch
+

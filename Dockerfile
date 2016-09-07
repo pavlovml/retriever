@@ -17,4 +17,4 @@ COPY src .
 # run
 EXPOSE 80
 ENV PORT 80
-CMD gunicorn -w ${WORKER_COUNT:-4} wsgi:app
+CMD wget --retry-connrefused --tries=100 -q --wait=1 --spider elasticsearch:9200 && gunicorn -w ${WORKER_COUNT:-4} wsgi:app
