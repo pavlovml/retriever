@@ -19,17 +19,8 @@ run: build
 		-p $(PORT):80 \
 		-it $(DOCKER_TAG)
 
-devel: build kill
-	docker run -d \
-	    --name pavlov_elasticsearch \
-	    -p $(ELASTICSEARCH_PORT):9200 \
-	    elasticsearch
-	docker run -d \
-	    --name pavlov_match \
-	    -p $(PORT):80 \
-	    --link pavlov_elasticsearch:elasticsearch \
-	    pavlov/match
+devel: build
+	docker-compose up -d
 
 kill:
-	-docker kill pavlov_elasticsearch pavlov_match
-	-docker rm pavlov_elasticsearch pavlov_match
+	docker-compose down

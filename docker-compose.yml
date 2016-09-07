@@ -8,4 +8,5 @@ services:
             - elasticsearch
     elasticsearch:
         image: elasticsearch
-
+        ports:
+            - "59200:9200"

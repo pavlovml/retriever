@@ -16,12 +16,23 @@
 
 ## Getting Started
 
-If you already have elasticsearch running:
-    $ docker run -e ELASTICSEARCH_URL=https://daisy.us-west-1.es.amazonaws.com -it pavlov/match
+If you already have ElasticSearch running:
+```
+$ docker run -e ELASTICSEARCH_URL=https://daisy.us-west-1.es.amazonaws.com -it pavlov/match
+```
 
-If you want to run elasticsearch in another docker container and link it to our `pavlov/match` container (use the `-p` option to export the ports from the containers to the host):
-    $ docker run --name -p 59200:9200 my_elasticsearch_db elasticsearch
-    $ docker run --link -p 8888:80 my_elasticsearch_db:elasticsearch pavlov/match
+If you want to run ElasticSearch in another docker container and link it to our `pavlov/match` container (use the `-p` option to export the ports from the containers to the host):
+```
+$ docker run --name -p 59200:9200 my_elasticsearch_db elasticsearch
+$ docker run --link -p 8888:80 my_elasticsearch_db:elasticsearch pavlov/match
+```
+
+or, if you have [`docker-compose`](https://docs.docker.com/compose/) installed on your system, type:
+```
+$ docker-compose up
+```
+
+(All the commands can be run using `make`. Take a look to the `Makefile` to check the options.)
 
 Match is packaged as a Docker container ([pavlov/match](https://hub.docker.com/r/pavlov/match/) on Docker Hub), making it highly portable and scalable to billions of images. You can configure a few options using environment variables:
 
@@ -41,6 +52,7 @@ Match is packaged as a Docker container ([pavlov/match](https://hub.docker.com/r
 * **WORKER_COUNT** *(default: 4)*
 
   The number of gunicorn worker forks to maintain in each Docker container.
+
 
 ### One-command deployment with spread
 
