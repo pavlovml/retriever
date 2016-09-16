@@ -23,13 +23,6 @@ services:
         networks:
             - matchnet
 
-
-    datastore:
-      image: redis:2
-      container_name: match-redis
-      networks:
-          - matchnet
-
 networks:
     matchnet:
 
