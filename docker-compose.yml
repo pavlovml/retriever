@@ -1,12 +1,35 @@
 version: '2'
 services:
     match:
+        environment:
+            ELASTICSEARCH_URL: "http://match-elasticsearch:9200"
+            ELASTICSEARCH_INDEX: "images"
+            ELASTICSEARCH_DOC_TYPE: "images"
+            PORT: 80
+
         build: .
-        ports:
-            - "8888:80"
-        links:
-            - elasticsearch
+        container_name: match
+        expose:
+            - "80"
+        networks:
+            - matchnet
+
     elasticsearch:
         image: elasticsearch
+        container_name: match-elasticsearch
         ports:
-            - "59200:9200"
+            - "9200:9200"
+            - "9300:9300"
+        networks:
+            - matchnet
+
+
+    datastore:
+      image: redis:2
+      container_name: match-redis
+      networks:
+          - matchnet
+
+networks:
+    matchnet:
+
