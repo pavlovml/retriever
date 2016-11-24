@@ -23,8 +23,8 @@ $ docker run -e ELASTICSEARCH_URL=https://daisy.us-west-1.es.amazonaws.com -it p
 
 If you want to run ElasticSearch in another docker container and link it to our `pavlov/match` container (use the `-p` option to export the ports from the containers to the host):
 ```
-$ docker run --name -p 59200:9200 my_elasticsearch_db elasticsearch
-$ docker run --link -p 8888:80 my_elasticsearch_db:elasticsearch pavlov/match
+$ docker run --name my_elasticsearch_db -p 59200:9200 elasticsearch
+$ docker run --link my_elasticsearch_db:elasticsearch -p 8888:80 pavlov/match
 ```
 
 or, if you have [`docker-compose`](https://docs.docker.com/compose/) installed on your system, type:
