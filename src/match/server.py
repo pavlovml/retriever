@@ -3,6 +3,7 @@ from flask import Flask, request
 from image_match.elasticsearch_driver import SignatureES
 from image_match.goldberg import ImageSignature
 import json
+import yaml
 import os
 
 # =============================================================================
@@ -47,34 +48,69 @@ def delete_ids(ids):
 def dist_to_percent(dist):
     return (1 - dist) * 100
 
-def get_image(url_field, file_field):
-    if url_field in request.form:
-        return request.form[url_field], False
-    else:
-        return request.files[file_field].read(), True
-
 # =============================================================================
 # Routes
 
 @app.route('/add', methods=['POST'])
 def add_handler():
-    path = request.form['filepath']
-    try:
-        metadata = json.loads(request.form['metadata'])
-    except KeyError:
-        metadata = None
-    img, bs = get_image('url', 'image')
+    if request.headers['Content-Type'] == 'application/x-www-form-urlencoded':
+        path = request.form['filepath']
+        try:
+            metadata = json.loads(request.form['metadata'])
+        except KeyError:
+            metadata = None
+        img = request.form['url']
 
-    old_ids = ids_with_path(path)
-    ses.add_image(path, img, bytestream=bs, metadata=metadata)
-    delete_ids(old_ids)
+        old_ids = ids_with_path(path)
+        ses.add_image(path, img, bytestream=False, metadata=metadata)
+        delete_ids(old_ids)
 
-    return json.dumps({
-        'status': 'ok',
-        'error': [],
-        'method': 'add',
-        'result': []
-    })
+        return json.dumps({
+            'status': 'ok',
+            'error': [],
+            'method': 'add',
+            'result': []
+        })
+    elif request.headers['Content-Type'] == 'application/json':
+        data = yaml.safe_load(request.data)
+        path = data['filepath']
+        try:
+            metadata = data['metadata']
+        except KeyError:
+            metadata = None
+        img = yaml.safe_load(request.data)['url']
+
+        old_ids = ids_with_path(path)
+        ses.add_image(path, img, bytestream=False, metadata=metadata)
+        delete_ids(old_ids)
+
+        return json.dumps({
+            'status': 'ok',
+            'error': [],
+            'method': 'add',
+            'result': []
+        })
+    elif request.headers['Content-Type'] == 'multipart/form-data':
+        path = request.form['filepath']
+        try:
+            metadata = json.loads(request.form['metadata'])
+        except KeyError:
+            metadata = None
+        img = request.files['url'].read()
+
+        old_ids = ids_with_path(path)
+        ses.add_image(path, img, bytestream=True, metadata=metadata)
+        delete_ids(old_ids)
+
+        return json.dumps({
+            'status': 'ok',
+            'error': [],
+            'method': 'add',
+            'result': []
+        })
+    else:
+        return 405
+
 
 @app.route('/delete', methods=['DELETE'])
 def delete_handler():
