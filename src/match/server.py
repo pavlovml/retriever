@@ -15,7 +15,9 @@ es = Elasticsearch([os.environ.get('ELASTICSEARCH_URL',
                                    'http://elasticsearch')])
 es_index = os.environ.get('ELASTICSEARCH_INDEX', 'images')
 es_doc_type = os.environ.get('ELASTICSEARCH_DOC_TYPE', 'images')
-ses = SignatureES(es, index=es_index, doc_type=es_doc_type)
+# maximum image signature distance to be considered a match (default 0.45)
+distance_cutoff_param = float(os.environ.get('DISTANCE_CUTOFF', 0.45))
+ses = SignatureES(es, index=es_index, doc_type=es_doc_type,distance_cutoff=distance_cutoff_param)
 gis = ImageSignature()
 
 # Try to create the index and ignore IndexAlreadyExistsException
@@ -48,6 +50,15 @@ def delete_ids(ids):
 def dist_to_percent(dist):
     return (1 - dist) * 100
 
+
+def get_image(url_field, file_field):
+    if url_field in request.form:
+        return request.form[url_field], False
+    elif url_field in yaml.safe_load(request.data):
+        return yaml.safe_load(request.data)['url'], False
+    else:
+        return request.files[file_field].read(), True
+
 # =============================================================================
 # Routes
 
@@ -59,10 +70,10 @@ def add_handler():
             metadata = json.loads(request.form['metadata'])
         except KeyError:
             metadata = None
-        img = request.form['url']
+        img, bs = get_image('url', 'image')
 
         old_ids = ids_with_path(path)
-        ses.add_image(path, img, bytestream=False, metadata=metadata)
+        ses.add_image(path, img, bytestream=bs, metadata=metadata)
         delete_ids(old_ids)
 
         return json.dumps({
@@ -78,10 +89,10 @@ def add_handler():
             metadata = data['metadata']
         except KeyError:
             metadata = None
-        img = yaml.safe_load(request.data)['url']
+        img, bs = get_image('url', 'image')
 
         old_ids = ids_with_path(path)
-        ses.add_image(path, img, bytestream=False, metadata=metadata)
+        ses.add_image(path, img, bytestream=bs, metadata=metadata)
         delete_ids(old_ids)
 
         return json.dumps({
@@ -96,10 +107,10 @@ def add_handler():
             metadata = json.loads(request.form['metadata'])
         except KeyError:
             metadata = None
-        img = request.files['url'].read()
+        img, bs = get_image('url', 'image')
 
         old_ids = ids_with_path(path)
-        ses.add_image(path, img, bytestream=True, metadata=metadata)
+        ses.add_image(path, img, bytestream=bs, metadata=metadata)
         delete_ids(old_ids)
 
         return json.dumps({
