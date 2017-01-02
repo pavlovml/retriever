@@ -156,6 +156,13 @@ def search_handler():
         } for m in matches]
     })
 
+@app.route('/search_metadata', methods=['POST'])
+def search_metadatahandler():
+    key = str(request.form["key"])
+    value = str(request.form["value"])
+    search = es.search(index=es_index, body={"query": {"term": {key: value}}})
+    return [h['_source'] for h in search['hits']['hits']]
+
 @app.route('/compare', methods=['POST'])
 def compare_handler():
     img1, bs1 = get_image('url1', 'image1')
