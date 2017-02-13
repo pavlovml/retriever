@@ -29,8 +29,10 @@ $ docker run --link my_elasticsearch_db:elasticsearch -p 8888:80 pavlov/match
 
 or, if you have [`docker-compose`](https://docs.docker.com/compose/) installed on your system, type:
 ```
-$ docker-compose up
+$ docker-compose up -d
 ```
+
+(If `match` does not start, it probably cant connect to elasticsearch just yet, wait 20 seconds and try `docker-compose up -d`)
 
 (All the commands can be run using `make`. Take a look to the `Makefile` to check the options.)
 
