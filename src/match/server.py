@@ -164,6 +164,12 @@ def search_handler():
     })
 
 
+@app.route('/reset', methods=['GET'])
+def reset_databasehandler():
+    es.indices.delete(index=es_index, ignore=[400, 404])
+    es.indices.create(index=es_index, ignore=400)
+
+
 @app.route('/search_metadata', methods=['POST'])
 def search_metadatahandler():
     key = ""
