@@ -3,6 +3,7 @@ from flask import Flask, request
 from image_match.elasticsearch_driver import SignatureES
 from image_match.goldberg import ImageSignature
 import json
+import yaml
 import os
 
 # =============================================================================
@@ -14,12 +15,15 @@ es = Elasticsearch([os.environ.get('ELASTICSEARCH_URL',
                                    'http://elasticsearch')])
 es_index = os.environ.get('ELASTICSEARCH_INDEX', 'images')
 es_doc_type = os.environ.get('ELASTICSEARCH_DOC_TYPE', 'images')
-ses = SignatureES(es, index=es_index, doc_type=es_doc_type)
+# maximum image signature distance to be considered a match (default 0.45)
+distance_cutoff_param = float(os.environ.get('DISTANCE_CUTOFF', 0.45))
+ses = SignatureES(es, index=es_index, doc_type=es_doc_type, distance_cutoff=distance_cutoff_param)
 gis = ImageSignature()
 
 # Try to create the index and ignore IndexAlreadyExistsException
 # if the index already exists
 es.indices.create(index=es_index, ignore=400)
+
 
 # =============================================================================
 # Helpers
@@ -30,6 +34,7 @@ def ids_with_path(path):
                         q='path:' + json.dumps(path))
     return [m['_id'] for m in matches['hits']['hits']]
 
+
 def paths_at_location(offset, limit):
     search = es.search(index=es_index,
                        from_=offset,
@@ -37,44 +42,92 @@ def paths_at_location(offset, limit):
                        _source='path')
     return [h['_source']['path'] for h in search['hits']['hits']]
 
+
 def count_images():
     return es.count(index=es_index)['count']
+
 
 def delete_ids(ids):
     for i in ids:
         es.delete(index=es_index, doc_type=es_doc_type, id=i, ignore=404)
 
+
 def dist_to_percent(dist):
     return (1 - dist) * 100
+
 
 def get_image(url_field, file_field):
     if url_field in request.form:
         return request.form[url_field], False
+    elif url_field in yaml.safe_load(request.data):
+        return yaml.safe_load(request.data)['url'], False
     else:
         return request.files[file_field].read(), True
+
 
 # =============================================================================
 # Routes
 
 @app.route('/add', methods=['POST'])
 def add_handler():
-    path = request.form['filepath']
-    try:
-        metadata = json.loads(request.form['metadata'])
-    except KeyError:
-        metadata = None
-    img, bs = get_image('url', 'image')
+    if request.headers['Content-Type'] == 'application/x-www-form-urlencoded':
+        path = request.form['filepath']
+        try:
+            metadata = json.loads(request.form['metadata'])
+        except KeyError:
+            metadata = None
+        img, bs = get_image('url', 'image')
 
-    old_ids = ids_with_path(path)
-    ses.add_image(path, img, bytestream=bs, metadata=metadata)
-    delete_ids(old_ids)
+        old_ids = ids_with_path(path)
+        ses.add_image(path, img, bytestream=bs, metadata=metadata)
+        delete_ids(old_ids)
 
-    return json.dumps({
-        'status': 'ok',
-        'error': [],
-        'method': 'add',
-        'result': []
-    })
+        return json.dumps({
+            'status': 'ok',
+            'error': [],
+            'method': 'add',
+            'result': []
+        })
+    elif request.headers['Content-Type'] == 'application/json':
+        data = yaml.safe_load(request.data)
+        path = data['filepath']
+        try:
+            metadata = data['metadata']
+        except KeyError:
+            metadata = None
+        img, bs = get_image('url', 'image')
+
+        old_ids = ids_with_path(path)
+        ses.add_image(path, img, bytestream=bs, metadata=metadata)
+        delete_ids(old_ids)
+
+        return json.dumps({
+            'status': 'ok',
+            'error': [],
+            'method': 'add',
+            'result': []
+        })
+    elif request.headers['Content-Type'] == 'multipart/form-data':
+        path = request.form['filepath']
+        try:
+            metadata = json.loads(request.form['metadata'])
+        except KeyError:
+            metadata = None
+        img, bs = get_image('url', 'image')
+
+        old_ids = ids_with_path(path)
+        ses.add_image(path, img, bytestream=bs, metadata=metadata)
+        delete_ids(old_ids)
+
+        return json.dumps({
+            'status': 'ok',
+            'error': [],
+            'method': 'add',
+            'result': []
+        })
+    else:
+        return 405
+
 
 @app.route('/delete', methods=['DELETE'])
 def delete_handler():
@@ -88,26 +141,63 @@ def delete_handler():
         'result': []
     })
 
+
 @app.route('/search', methods=['POST'])
 def search_handler():
     img, bs = get_image('url', 'image')
     all_orient = request.form.get('all_orientations', 'true') == 'true'
 
     matches = ses.search_image(
-            path=img,
-            all_orientations=all_orient,
-            bytestream=bs)
+        path=img,
+        all_orientations=all_orient,
+        bytestream=bs)
 
     return json.dumps({
         'status': 'ok',
         'error': [],
         'method': 'search',
         'result': [{
-            'score': dist_to_percent(m['dist']),
-            'filepath': m['path'],
-            'metadata': m['metadata']
-        } for m in matches]
+                       'score': dist_to_percent(m['dist']),
+                       'filepath': m['path'],
+                       'metadata': m['metadata']
+                   } for m in matches]
     })
+
+
+@app.route('/reset', methods=['GET'])
+def reset_databasehandler():
+    es.indices.delete(index=es_index, ignore=[400, 404])
+    es.indices.create(index=es_index, ignore=400)
+
+
+@app.route('/search_metadata', methods=['POST'])
+def search_metadatahandler():
+    key = ""
+    value = ""
+    if request.headers['Content-Type'] == 'application/x-www-form-urlencoded':
+        key = str(request.form["key"])
+        value = str(request.form["value"])
+    elif request.headers['Content-Type'] == 'application/json':
+        data = yaml.safe_load(request.data)
+        key = str(data["key"])
+        value = str(data["value"])
+
+    search_body = {
+        "query": {
+            "match": {
+                key: value
+            }
+        }
+    }
+
+    search = es.search(index=es_index, body=search_body)
+    return json.dumps({
+        'status': 'ok',
+        'error': [],
+        'method': 'delete',
+        'result': [h['_source'] for h in search['hits']['hits']]
+    })
+
 
 @app.route('/compare', methods=['POST'])
 def compare_handler():
@@ -121,8 +211,9 @@ def compare_handler():
         'status': 'ok',
         'error': [],
         'method': 'compare',
-        'result': [{ 'score': score }]
+        'result': [{'score': score}]
     })
+
 
 @app.route('/count', methods=['GET'])
 def count_handler():
@@ -133,6 +224,7 @@ def count_handler():
         'method': 'count',
         'result': [count]
     })
+
 
 @app.route('/list', methods=['GET'])
 def list_handler():
@@ -147,6 +239,7 @@ def list_handler():
         'result': paths
     })
 
+
 @app.route('/ping', methods=['GET'])
 def ping_handler():
     return json.dumps({
@@ -155,6 +248,7 @@ def ping_handler():
         'method': 'ping',
         'result': []
     })
+
 
 # =============================================================================
 # Error Handling
@@ -168,6 +262,7 @@ def page_not_found(e):
         'result': []
     }), 400
 
+
 @app.errorhandler(404)
 def page_not_found(e):
     return json.dumps({
@@ -177,6 +272,7 @@ def page_not_found(e):
         'result': []
     }), 404
 
+
 @app.errorhandler(405)
 def page_not_found(e):
     return json.dumps({
@@ -185,6 +281,7 @@ def page_not_found(e):
         'method': '',
         'result': []
     }), 405
+
 
 @app.errorhandler(500)
 def page_not_found(e):
