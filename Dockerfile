@@ -1,20 +1,20 @@
 FROM python:3
 MAINTAINER Alex Kern <alex@pavlov.ai>
 
-# deps
 RUN apt-get update && \
     apt-get install -y libopenblas-dev gfortran && \
-    pip install numpy && \
-    pip install scipy && \
-    pip install flask gunicorn && \
-    pip install image-match==1.1.2
+    pip install numpy==1.12.1 && \
+    pip install scipy==0.19.0 && \
+    pip install gevent==1.2.1 && \
+    pip install flask==0.12.2 && \
+    pip install image-match==1.1.2 && \
+    rm -rf /var/lib/apt/lists/*
 
-# install
-RUN mkdir -p /app
-WORKDIR /app
-COPY src .
+COPY server.py wait-for-it.sh /
 
-# run
 EXPOSE 80
-ENV PORT 80
-CMD gunicorn -w ${WORKER_COUNT:-4} wsgi:app
+ENV PORT=80 \
+    ELASTICSEARCH_URL=elasticsearch:9200 \
+    ELASTICSEARCH_INDEX=images \
+    ELASTICSEARCH_DOC_TYPE=images
+CMD /wait-for-it.sh -t 60 ${ELASTICSEARCH_URL} -- env PORT=${PORT} python /server.py

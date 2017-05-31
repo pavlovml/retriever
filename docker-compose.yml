@@ -1,12 +1,14 @@
 version: '2'
 services:
-    match:
-        build: .
-        ports:
-            - "8888:80"
-        links:
-            - elasticsearch
-    elasticsearch:
-        image: elasticsearch
-        ports:
-            - "59200:9200"
+  match:
+    image: pavlov/match:latest
+    ports:
+    - 8888:8888
+    environment:
+    - PORT=8888
+    links:
+    - elasticsearch
+  elasticsearch:
+    image: elasticsearch
+    ports:
+    - 9200:9200

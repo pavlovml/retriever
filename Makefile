@@ -1,9 +1,11 @@
-.PHONY: all build push run devel kill
+.PHONY: all build push run dev
 
-DOCKER_TAG ?= pavlov/match
-ELASTICSEARCH_URL ?=
-PORT ?= 8000
-ELASTICSEARCH_PORT ?= 59200
+DOCKER_TAG ?= pavlov/match:latest
+
+export PORT ?= 8888
+export ELASTICSEARCH_URL ?= elasticsearch:9200
+export ELASTICSEARCH_INDEX ?= images
+export ELASTICSEARCH_DOC_TYPE ?= images
 
 all: run
 
@@ -15,12 +17,12 @@ push: build
 
 run: build
 	docker run \
+		-e PORT \
 		-e ELASTICSEARCH_URL \
-		-p $(PORT):80 \
+		-e ELASTICSEARCH_INDEX \
+		-e ELASTICSEARCH_DOC_TYPE \
+		-p $(PORT):$(PORT) \
 		-it $(DOCKER_TAG)
 
-devel: build
-	docker-compose up -d
-
-kill:
-	docker-compose down
+dev: build
+	docker-compose up
