@@ -17,4 +17,4 @@ ENV PORT=80 \
     ELASTICSEARCH_URL=elasticsearch:9200 \
     ELASTICSEARCH_INDEX=images \
     ELASTICSEARCH_DOC_TYPE=images
-CMD /wait-for-it.sh -t 60 ${ELASTICSEARCH_URL} -- env PORT=${PORT} python /server.py
+CMD python /server.py
