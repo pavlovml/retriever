@@ -1,8 +1,8 @@
-<p align="center"><img src="https://raw.githubusercontent.com/pavlovml/match/master/resources/logo.png" alt="logo" width="220" /></p>
+<p align="center"><img src="https://raw.githubusercontent.com/pavlovai/match/master/resources/logo.png" alt="logo" width="220" /></p>
 
 <p align="center"><strong>Scalable reverse image search</strong><br /><em>built on <a href="http://kubernetes.io/">Kubernetes</a> and <a href="https://www.elastic.co/">Elasticsearch</a></em></p>
 
-<p align="center"><a href="https://github.com/pavlovml/match/stargazers"><img src="https://img.shields.io/github/stars/pavlovml/match.svg?style=flat" alt="GitHub stars" /></a> <a href="https://hub.docker.com/r/pavlov/match/"><img src="https://img.shields.io/docker/pulls/pavlov/match.svg" alt="Docker Pulls" /></a> <a href="http://kubernetes.io"><img src="https://img.shields.io/badge/kubernetes-ready-brightgreen.svg?style=flat" alt="Kubernetes shield" /></a></p>
+<p align="center"><a href="https://github.com/pavlovai/match/stargazers"><img src="https://img.shields.io/github/stars/pavlovai/match.svg?style=flat" alt="GitHub stars" /></a> <a href="https://hub.docker.com/r/pavlov/match/"><img src="https://img.shields.io/docker/pulls/pavlov/match.svg" alt="Docker Pulls" /></a> <a href="http://kubernetes.io"><img src="https://img.shields.io/badge/kubernetes-ready-brightgreen.svg?style=flat" alt="Kubernetes shield" /></a></p>
 
 **Pavlov Match** makes it easy to search for images that look similar to each other. Using a state-of-the-art perceptual hash, it is invariant to scaling and 90 degree rotations. Its HTTP API is quick to integrate and flexible for a number of reverse image search applications. Kubernetes and Elasticsearch allow Match to scale to billions of images with ease while giving you full control over where your data is stored. Match uses the awesome [ascribe/image-match](https://github.com/ascribe/image-match) under the hood for most of the image search legwork.
 
@@ -26,8 +26,6 @@ If you want to run ElasticSearch locally as well, have [`docker-compose`](https:
 $ make dev
 ```
 
-(All the commands can be run using `make`. Take a look to the `Makefile` to check the options.)
-
 Match is packaged as a Docker container ([pavlov/match](https://hub.docker.com/r/pavlov/match/) on Docker Hub), making it highly portable and scalable to billions of images. You can configure a few options using environment variables:
 
 * **ELASTICSEARCH_URL** *(default: `http://elasticsearch`)*
@@ -49,7 +47,7 @@ Match is packaged as a Docker container ([pavlov/match](https://hub.docker.com/r
 Match is particularly awesomesauce when integrated into the Kubernetes container orchestration architecture. [`spread`](https://github.com/redspread/spread) makes it easy to get Match up and running quickly:
 
     $ go get rsprd.com/spread/cmd/spread
-    $ git clone https://github.com/pavlovml/match
+    $ git clone https://github.com/pavlovai/match
     $ vim .k2e/secret.yml # configure me
     $ spread deploy .
 
@@ -329,4 +327,4 @@ Check for the health of the server.
 
 Match is based on [ascribe/image-match](https://github.com/ascribe/image-match), which is in turn based on the paper [_An image signature for any kind of image_, Goldberg et al](http://www.cs.cmu.edu/~hcwong/Pdfs/icip02.ps). There is an existing [reference implementation](https://www.pureftpd.org/project/libpuzzle) which may be more suited to your needs.
 
-Match itself is released under the [BSD 3-Clause license](https://github.com/pavlovml/match/blob/master/LICENSE). `ascribe/image-match` is released under the Apache 2.0 license.
+Match itself is released under the [BSD 3-Clause license](https://github.com/pavlovai/match/blob/master/LICENSE). `ascribe/image-match` is released under the Apache 2.0 license.
