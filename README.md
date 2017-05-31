@@ -49,7 +49,6 @@ You can configure the service, replication controller, and secret like so:
 apiVersion: v1
 kind: Service
 metadata:
-  namespace: default
   name: match
 spec:
   ports:
