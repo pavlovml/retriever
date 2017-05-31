@@ -28,7 +28,7 @@ $ make dev
 
 Match is packaged as a Docker container ([pavlov/match](https://hub.docker.com/r/pavlov/match/) on Docker Hub), making it highly portable and scalable to billions of images. You can configure a few options using environment variables:
 
-* **ELASTICSEARCH_URL** *(default: `http://elasticsearch`)*
+* **ELASTICSEARCH_URL** *(default: `elasticsearch:9200`)*
 
   A URL pointing to the Elasticsearch database where image signatures are to be stored. If you don't want to host your own Elasticsearch cluster, consider using [AWS Elasticsearch Service](https://aws.amazon.com/elasticsearch-service/). That's what we use.
   Note: in order to allow containers linking, the default value is set to `http://elasticsearch`
