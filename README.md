@@ -21,15 +21,9 @@ If you already have ElasticSearch running:
 $ docker run -e ELASTICSEARCH_URL=https://daisy.us-west-1.es.amazonaws.com -it pavlov/match
 ```
 
-If you want to run ElasticSearch in another docker container and link it to our `pavlov/match` container (use the `-p` option to export the ports from the containers to the host):
+If you want to run ElasticSearch locally as well, have [`docker-compose`](https://docs.docker.com/compose/) installed on your system, clone this repository and type:
 ```
-$ docker run --name my_elasticsearch_db -p 59200:9200 elasticsearch
-$ docker run --link my_elasticsearch_db:elasticsearch -p 8888:80 pavlov/match
-```
-
-or, if you have [`docker-compose`](https://docs.docker.com/compose/) installed on your system, type:
-```
-$ docker-compose up
+$ make dev
 ```
 
 (All the commands can be run using `make`. Take a look to the `Makefile` to check the options.)
@@ -48,10 +42,6 @@ Match is packaged as a Docker container ([pavlov/match](https://hub.docker.com/r
 * **ELASTICSEARCH_DOC_TYPE** *(default: images)*
 
   The doc type used for storing image signatures.
-
-* **WORKER_COUNT** *(default: 4)*
-
-  The number of gunicorn worker forks to maintain in each Docker container.
 
 
 ### One-command deployment with spread
@@ -88,10 +78,9 @@ spec:
 apiVersion: v1
 kind: ReplicationController
 metadata:
-  namespace: default
   name: match
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     app: match
   template:
@@ -105,11 +94,6 @@ spec:
         ports:
         - containerPort: 80
         env:
-        - name: WORKER_COUNT
-          valueFrom:
-            secretKeyRef:
-              name: match
-              key: worker-count
         - name: ELASTICSEARCH_URL
           valueFrom:
             secretKeyRef:
@@ -132,12 +116,8 @@ spec:
 apiVersion: v1
 kind: Secret
 metadata:
-  namespace: default
   name: match
 data:
-  # 4, base64 encoded
-  worker-count: NA==
-
   # https://daisy.us-west-1.es.amazonaws.com (change me)
   elasticsearch.url: aHR0cHM6Ly9kYWlzeS51cy13ZXN0LTEuZXMuYW1hem9uYXdzLmNvbQ==
 
