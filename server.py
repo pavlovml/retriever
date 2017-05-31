@@ -1,19 +1,22 @@
 from elasticsearch import Elasticsearch
 from flask import Flask, request
+from gevent.pywsgi import WSGIServer
 from image_match.elasticsearch_driver import SignatureES
 from image_match.goldberg import ImageSignature
 import json
 import os
+import sys
 
 # =============================================================================
 # Globals
 
+port = int(os.environ['PORT'])
+es_url = os.environ['ELASTICSEARCH_URL']
+es_index = os.environ['ELASTICSEARCH_INDEX']
+es_doc_type = os.environ['ELASTICSEARCH_DOC_TYPE']
 
 app = Flask(__name__)
-es = Elasticsearch([os.environ.get('ELASTICSEARCH_URL',
-                                   'http://elasticsearch')])
-es_index = os.environ.get('ELASTICSEARCH_INDEX', 'images')
-es_doc_type = os.environ.get('ELASTICSEARCH_DOC_TYPE', 'images')
+es = Elasticsearch([es_url])
 ses = SignatureES(es, index=es_index, doc_type=es_doc_type)
 gis = ImageSignature()
 
@@ -160,7 +163,7 @@ def ping_handler():
 # Error Handling
 
 @app.errorhandler(400)
-def page_not_found(e):
+def bad_request(e):
     return json.dumps({
         'status': 'fail',
         'error': ['bad request'],
@@ -178,7 +181,7 @@ def page_not_found(e):
     }), 404
 
 @app.errorhandler(405)
-def page_not_found(e):
+def method_not_allowed(e):
     return json.dumps({
         'status': 'fail',
         'error': ['method not allowed'],
@@ -187,10 +190,17 @@ def page_not_found(e):
     }), 405
 
 @app.errorhandler(500)
-def page_not_found(e):
+def server_error(e):
     return json.dumps({
         'status': 'fail',
         'error': [str(e)],
         'method': '',
         'result': []
     }), 500
+
+# =============================================================================
+# Server
+
+if __name__ == "__main__":
+    print('listening on port {}'.format(port), flush=True)
+    WSGIServer(('0.0.0.0', port), app).serve_forever()
