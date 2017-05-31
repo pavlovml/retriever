@@ -8,7 +8,6 @@
 
 1. [Getting Started](#getting-started)
   * [Setting up Elasticsearch](#setting-up-elasticsearch)
-  * [One-command deployment with spread](#one-command-deployment-with-spread)
   * [Using in your own Kubernetes cluster](#using-in-your-own-kubernetes-cluster)
 2. [API](#api)
 3. [Development](#development)
@@ -31,7 +30,6 @@ Match is packaged as a Docker container ([pavlov/match](https://hub.docker.com/r
 * **ELASTICSEARCH_URL** *(default: `elasticsearch:9200`)*
 
   A URL pointing to the Elasticsearch database where image signatures are to be stored. If you don't want to host your own Elasticsearch cluster, consider using [AWS Elasticsearch Service](https://aws.amazon.com/elasticsearch-service/). That's what we use.
-  Note: in order to allow containers linking, the default value is set to `http://elasticsearch`
 
 * **ELASTICSEARCH_INDEX** *(default: images)*
 
@@ -41,15 +39,6 @@ Match is packaged as a Docker container ([pavlov/match](https://hub.docker.com/r
 
   The doc type used for storing image signatures.
 
-
-### One-command deployment with spread
-
-Match is particularly awesomesauce when integrated into the Kubernetes container orchestration architecture. [`spread`](https://github.com/redspread/spread) makes it easy to get Match up and running quickly:
-
-    $ go get rsprd.com/spread/cmd/spread
-    $ git clone https://github.com/pavlovai/match
-    $ vim .k2e/secret.yml # configure me
-    $ spread deploy .
 
 ### Using in your own Kubernetes cluster
 
