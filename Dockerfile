@@ -8,7 +8,10 @@ RUN apt-get update && \
     pip install gunicorn==19.7.1 && \
     pip install flask==0.12.2 && \
     pip install image-match==1.1.2 && \
+    pip install requests-aws4auth==0.8 && \
     rm -rf /var/lib/apt/lists/*
+
+RUN pip install botocore==1.5.92
 
 COPY server.py wait-for-it.sh /
 
