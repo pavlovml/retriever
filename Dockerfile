@@ -8,6 +8,7 @@ RUN apt-get update && \
     pip install gunicorn==19.7.1 && \
     pip install flask==0.12.2 && \
     pip install image-match==1.1.2 && \
+    pip install 'elasticsearch>=6.0.0,<7.0.0' && \
     rm -rf /var/lib/apt/lists/*
 
 COPY server.py wait-for-it.sh /
