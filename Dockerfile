@@ -1,4 +1,4 @@
-FROM python:3
+FROM python:3.6
 MAINTAINER Alex Kern <alex@distributedsystems.com>
 
 RUN apt-get update && \
