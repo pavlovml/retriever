@@ -126,7 +126,7 @@ def compare_handler():
         'result': [{ 'score': score }]
     })
 
-@app.route('/count', methods=['GET'])
+@app.route('/count', methods=['GET', 'POST'])
 def count_handler():
     count = count_images()
     return json.dumps({
@@ -153,7 +153,7 @@ def list_handler():
         'result': paths
     })
 
-@app.route('/ping', methods=['GET'])
+@app.route('/ping', methods=['GET', 'POST'])
 def ping_handler():
     return json.dumps({
         'status': 'ok',
