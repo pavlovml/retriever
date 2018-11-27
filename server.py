@@ -136,10 +136,14 @@ def count_handler():
         'result': [count]
     })
 
-@app.route('/list', methods=['GET'])
+@app.route('/list', methods=['GET', 'POST'])
 def list_handler():
-    offset = max(int(request.args.get('offset', 0)), 0)
-    limit = max(int(request.args.get('limit', 20)), 0)
+    if request.method == 'GET':
+        offset = max(int(request.args.get('offset', 0)), 0)
+        limit = max(int(request.args.get('limit', 20)), 0)
+    else:
+        offset = max(int(request.form.get('offset', 0)), 0)
+        limit = max(int(request.form.get('limit', 20)), 0)
     paths = paths_at_location(offset, limit)
 
     return json.dumps({
