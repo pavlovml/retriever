@@ -13,10 +13,11 @@ es_url = os.environ['ELASTICSEARCH_URL']
 es_index = os.environ['ELASTICSEARCH_INDEX']
 es_doc_type = os.environ['ELASTICSEARCH_DOC_TYPE']
 all_orientations = os.environ['ALL_ORIENTATIONS']
+distance_cutoff_param = float(os.environ.get('DISTANCE_CUTOFF', 0.45))
 
 app = Flask(__name__)
 es = Elasticsearch([es_url], verify_certs=True, timeout=60, max_retries=10, retry_on_timeout=True)
-ses = SignatureES(es, index=es_index, doc_type=es_doc_type)
+ses = SignatureES(es, index=es_index, doc_type=es_doc_type, distance_cutoff=distance_cutoff_param)
 gis = ImageSignature()
 
 # Try to create the index and ignore IndexAlreadyExistsException

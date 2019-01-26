@@ -19,7 +19,8 @@ ENV PORT=80 \
     ELASTICSEARCH_URL=elasticsearch:9200 \
     ELASTICSEARCH_INDEX=images \
     ELASTICSEARCH_DOC_TYPE=images \
-    ALL_ORIENTATIONS=true
+    ALL_ORIENTATIONS=true \
+    DISTANCE_CUTOFF=0.45
 
 CMD gunicorn \
     -t 60 \

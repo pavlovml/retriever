@@ -6,6 +6,7 @@ export PORT ?= 8888
 export ELASTICSEARCH_URL ?= elasticsearch:9200
 export ELASTICSEARCH_INDEX ?= images
 export ELASTICSEARCH_DOC_TYPE ?= images
+export DISTANCE_CUTOFF ?= 0.45
 
 all: run
 
@@ -21,6 +22,7 @@ run: build
 		-e ELASTICSEARCH_URL \
 		-e ELASTICSEARCH_INDEX \
 		-e ELASTICSEARCH_DOC_TYPE \
+		-e DISTANCE_CUTOFF \
 		-p $(PORT):$(PORT) \
 		-it $(DOCKER_TAG)
 
