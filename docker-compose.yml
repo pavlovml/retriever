@@ -3,11 +3,18 @@ services:
   match:
     image: dsys/match:latest
     ports:
-    - 8888:8888
-    command: ["/wait-for-it.sh", "-t", "60", "elasticsearch:9200", "--", "gunicorn", "-b", "0.0.0.0:8888", "-w", "4", "server:app"]
+      - ${API_HOST_PORT}:8888
+    command: ["/wait-for-it.sh", "-t", "60",
+              "elasticsearch:9200",
+              "--", "gunicorn", "-b", "0.0.0.0:8888", "-w", "4", "server:app"]
     links:
-    - elasticsearch
+      - elasticsearch
   elasticsearch:
     image: elasticsearch:6.4.2
     ports:
-    - 9200:9200
+      - ${ELASTIC_HOST_PORT}:9200
+    volumes:
+    - elastic_data:/usr/share/elasticsearch/data
+
+volumes:
+  elastic_data:
