@@ -10,6 +10,7 @@ export ELASTICSEARCH_DOC_TYPE ?= images
 all: run
 
 build:
+	@eval $(sysctl -w vm.max_map_count=262144) \ # Set max VM before create containers https://github.com/dsys/match/issues/25
 	docker build -t $(DOCKER_TAG) .
 
 push: build
