@@ -84,6 +84,8 @@ spec:
         env:
         - name: WORKER_COUNT
           value: "4"
+        - name: DISTANCE_CUTOFF
+          value: 0.45
         - name: ELASTICSEARCH_URL
           valueFrom:
             secretKeyRef:
